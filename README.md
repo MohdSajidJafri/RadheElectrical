@@ -160,20 +160,6 @@ npm run preview
 npm run lint
 ```
 
----
-
-## 🌐 Deployment (Netlify Ready)
-
-This repository includes a `public/_redirects` file (`/* /index.html 200`) configured for single-page applications.
-
-To deploy on [Netlify](https://www.netlify.com/):
-1. Connect your GitHub repository `MohdSajidJafri/RadheElectrical`.
-2. Build command: `npm run build`
-3. Publish directory: `dist`
-4. Deploy!
-
----
-
 ## 📞 Contact
 
 **RADHE ELECTRICAL**  
