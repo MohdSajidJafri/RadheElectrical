@@ -1,97 +1,185 @@
-import { ArrowRight, Check } from 'lucide-react';
+import React from 'react';
+import { ArrowRight } from 'lucide-react';
 
-interface AboutProps {
-  onOpenQuote: () => void;
-}
-
-export const About = ({ onOpenQuote }: AboutProps) => {
+export const About: React.FC = () => {
   return (
-    <section id="about" className="py-28 bg-[#F6F5EE] text-slate-900 border-b border-slate-300 relative overflow-hidden">
-      <div className="container-custom">
+    <section id="about" className="py-16 sm:py-24 bg-[#FAFBF5] text-[#121416] border-t border-[rgba(18,20,22,0.08)]">
+      
+      <div className="container-custom space-y-16">
         
-        {/* Massive Manifesto Statement */}
-        <div className="max-w-5xl mb-20">
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-700 block mb-4">
-            01 / Engineering Philosophy
-          </span>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-slate-950 leading-[1.05] uppercase">
-            Built for the roof. <br />
-            <span className="text-amber-800">Engineered for the Rajasthan sun.</span>
-          </h2>
-        </div>
-
-        {/* Asymmetric Photographic & Technical Composition */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start mb-20">
+        {/* Top Grid: Headline Narrative (Left) + 3 Photo Cards (Right) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
           
-          {/* Left Column: Detail Architecture Photo (7 cols) */}
-          <div className="lg:col-span-7 space-y-4">
-            <div className="aspect-[16/10] sm:aspect-[16/9] rounded-sm overflow-hidden bg-slate-900 shadow-xl border border-slate-300">
-              <img
-                src="/images/structure-detail.jpg"
-                alt="Galvanized steel solar mounting structure"
-                className="w-full h-full object-cover"
-                loading="lazy"
-              />
-            </div>
-            <div className="flex items-center justify-between text-xs text-slate-600 font-mono pt-1">
-              <span>[ Heavy-Duty Galvanized Iron Structure ]</span>
-              <span>Near Giriraj Dharan Temple, Agra Road</span>
+          {/* Left Column (4 cols) */}
+          <div className="lg:col-span-4 space-y-5">
+            <span className="font-display text-[11px] font-bold text-[#686F76] uppercase tracking-wider block">
+              WHY RADHE ELECTRICAL?
+            </span>
+
+            <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[#121416] tracking-tight leading-[1.15]">
+              Engineering discipline.<br />
+              Local accountability.<br />
+              Long-term value.
+            </h2>
+
+            <p className="text-xs sm:text-sm text-[#686F76] leading-relaxed">
+              From structure to inverter, every element is designed and installed for maximum safety, performance and reliability.
+            </p>
+
+            <div className="pt-2">
+              <a
+                href="#contact"
+                className="inline-flex items-center gap-2 font-display text-xs font-bold text-[#121416] uppercase hover:text-[#C46A38] transition-colors"
+              >
+                <span>OUR STORY</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
 
-          {/* Right Column: Physical Engineering Truths (5 cols) */}
-          <div className="lg:col-span-5 space-y-8 lg:pt-4">
-            <p className="text-base sm:text-lg text-slate-700 leading-relaxed font-normal">
-              Based on Agra Road in Dausa, <strong className="text-slate-950 font-bold">RADHE ELECTRICAL</strong> designs and installs solar power systems built to withstand the high ambient temperatures and desert wind loads of eastern Rajasthan.
-            </p>
-
-            <div className="space-y-6 pt-4 border-t border-slate-300">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-sm font-bold text-slate-950 uppercase tracking-wide">
-                  <Check className="w-4 h-4 text-amber-700" />
-                  <span>Structural Anchoring & Corrosion Resistance</span>
+          {/* Right Column: 3 Architectural Feature Cards (8 cols) */}
+          <div className="lg:col-span-8 grid grid-cols-1 sm:grid-cols-3 gap-5">
+            
+            {/* Card 1 */}
+            <div className="bg-white border border-[rgba(18,20,22,0.08)] rounded-sm overflow-hidden flex flex-col justify-between group shadow-xs">
+              <div>
+                <div className="aspect-[4/3] bg-[#F2F2EF] overflow-hidden">
+                  <img
+                    src="/images/technician-maintenance.jpg"
+                    alt="Precision solar installation by trained professionals"
+                    className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+                  />
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed pl-6">
-                  Hot-dip galvanized mounting structures anchored securely to withstand gale-force wind speeds without penetrating terrace waterproofing.
-                </p>
+                <div className="p-5 space-y-2">
+                  <h3 className="font-display font-bold text-sm text-[#121416]">
+                    Precision Installation
+                  </h3>
+                  <p className="text-xs text-[#686F76] leading-relaxed">
+                    Trained professionals. Safe practices. Clean execution.
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-sm font-bold text-slate-950 uppercase tracking-wide">
-                  <Check className="w-4 h-4 text-amber-700" />
-                  <span>Dual Chemical Earthing & Surge Protection</span>
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed pl-6">
-                  Dedicated grounding pits and AC/DC surge protection devices (SPD) protecting home and commercial appliances from voltage spikes.
-                </p>
-              </div>
-
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-sm font-bold text-slate-950 uppercase tracking-wide">
-                  <Check className="w-4 h-4 text-amber-700" />
-                  <span>Direct Local Dausa Depot</span>
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed pl-6">
-                  Physical presence near Giriraj Dharan Temple for prompt on-site surveys, string testing, and warranty servicing.
-                </p>
+              <div className="p-5 pt-0">
+                <a
+                  href="#contact"
+                  className="inline-flex items-center gap-1.5 font-display text-[11px] font-bold text-[#121416] uppercase group-hover:text-[#C46A38] transition-colors"
+                >
+                  <span>LEARN MORE</span>
+                  <ArrowRight className="w-3 h-3" />
+                </a>
               </div>
             </div>
 
-            <div className="pt-2">
-              <button
-                onClick={onOpenQuote}
-                className="btn-mineral text-xs py-3 px-6 shadow-sm"
-              >
-                <span>Request On-Site Rooftop Survey</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+            {/* Card 2 */}
+            <div className="bg-white border border-[rgba(18,20,22,0.08)] rounded-sm overflow-hidden flex flex-col justify-between group shadow-xs">
+              <div>
+                <div className="aspect-[4/3] bg-[#F2F2EF] overflow-hidden">
+                  <img
+                    src="/images/inverter-system.jpg"
+                    alt="High quality solar inverters and cabling"
+                    className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+                  />
+                </div>
+                <div className="p-5 space-y-2">
+                  <h3 className="font-display font-bold text-sm text-[#121416]">
+                    Premium Quality
+                  </h3>
+                  <p className="text-xs text-[#686F76] leading-relaxed">
+                    High-efficiency inverters, modules & protection.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-5 pt-0">
+                <a
+                  href="#contact"
+                  className="inline-flex items-center gap-1.5 font-display text-[11px] font-bold text-[#121416] uppercase group-hover:text-[#C46A38] transition-colors"
+                >
+                  <span>LEARN MORE</span>
+                  <ArrowRight className="w-3 h-3" />
+                </a>
+              </div>
             </div>
 
+            {/* Card 3 */}
+            <div className="bg-white border border-[rgba(18,20,22,0.08)] rounded-sm overflow-hidden flex flex-col justify-between group shadow-xs">
+              <div>
+                <div className="aspect-[4/3] bg-[#F2F2EF] overflow-hidden">
+                  <img
+                    src="/images/structure-detail.jpg"
+                    alt="Galvanized iron mounting structures for Rajasthan conditions"
+                    className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+                  />
+                </div>
+                <div className="p-5 space-y-2">
+                  <h3 className="font-display font-bold text-sm text-[#121416]">
+                    Engineered Structures
+                  </h3>
+                  <p className="text-xs text-[#686F76] leading-relaxed">
+                    GI structures designed for Rajasthan conditions.
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-5 pt-0">
+                <a
+                  href="#contact"
+                  className="inline-flex items-center gap-1.5 font-display text-[11px] font-bold text-[#121416] uppercase group-hover:text-[#C46A38] transition-colors"
+                >
+                  <span>LEARN MORE</span>
+                  <ArrowRight className="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* Bottom Horizontal Specification Metric Strip from Reference */}
+        <div className="pt-10 border-t border-[rgba(18,20,22,0.08)] grid grid-cols-2 lg:grid-cols-4 gap-8 text-center sm:text-left">
+          
+          <div className="space-y-1">
+            <strong className="font-display font-extrabold text-3xl sm:text-4xl text-[#121416] block">
+              500+
+            </strong>
+            <span className="font-body text-xs text-[#686F76] block">
+              Happy Customers
+            </span>
+          </div>
+
+          <div className="space-y-1">
+            <strong className="font-display font-extrabold text-3xl sm:text-4xl text-[#121416] block">
+              1500+
+            </strong>
+            <span className="font-body text-xs text-[#686F76] block">
+              Solar Systems Installed
+            </span>
+          </div>
+
+          <div className="space-y-1">
+            <strong className="font-display font-extrabold text-3xl sm:text-4xl text-[#121416] block">
+              5+
+            </strong>
+            <span className="font-body text-xs text-[#686F76] block">
+              Years of Experience
+            </span>
+          </div>
+
+          <div className="space-y-1">
+            <strong className="font-display font-extrabold text-3xl sm:text-4xl text-[#121416] block">
+              100%
+            </strong>
+            <span className="font-body text-xs text-[#686F76] block">
+              After-Sales Support
+            </span>
           </div>
 
         </div>
 
       </div>
+
     </section>
   );
 };

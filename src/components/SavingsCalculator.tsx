@@ -1,193 +1,227 @@
-import { useState } from 'react';
-import { ArrowRight, Home, Building } from 'lucide-react';
+import React, { useState } from 'react';
+import { ArrowRight, Sun } from 'lucide-react';
 import type { SolarCapacityOption } from '../types';
 
 interface SavingsCalculatorProps {
-  onApplyCalculatedCapacity: (capacity: SolarCapacityOption, calculatedNotes: string) => void;
+  onSelectCapacity: (capacity: SolarCapacityOption) => void;
+  onOpenQuote: () => void;
 }
 
-export const SavingsCalculator = ({ onApplyCalculatedCapacity }: SavingsCalculatorProps) => {
-  const [monthlyBill, setMonthlyBill] = useState<number>(5000);
-  const [propertyType, setPropertyType] = useState<'residential' | 'commercial'>('residential');
+export const SavingsCalculator: React.FC<SavingsCalculatorProps> = ({
+  onSelectCapacity,
+  onOpenQuote
+}) => {
+  const [monthlyBill, setMonthlyBill] = useState<number>(4500);
+  const [tariffType, setTariffType] = useState<'residential' | 'commercial'>('residential');
 
-  const tariffPerUnit = propertyType === 'residential' ? 7.5 : 9.0;
-  const monthlyUnitsConsumed = Math.round(monthlyBill / tariffPerUnit);
-  
-  const rawKwNeeded = monthlyUnitsConsumed / 130;
+  const unitRate = tariffType === 'residential' ? 7.8 : 9.5;
+  const estimatedMonthlyUnits = Math.round(monthlyBill / unitRate);
+  const calculatedKw = Math.max(1, Math.round((estimatedMonthlyUnits / 120) * 10) / 10);
+
   let recommendedCapacity: SolarCapacityOption = '3 KW';
-  let numericKw = 3;
+  if (calculatedKw <= 1.4) recommendedCapacity = '1 KW';
+  else if (calculatedKw <= 2.4) recommendedCapacity = '2 KW';
+  else if (calculatedKw <= 4.0) recommendedCapacity = '3 KW';
+  else if (calculatedKw <= 7.5) recommendedCapacity = '5 KW';
+  else recommendedCapacity = '10 KW+';
 
-  if (rawKwNeeded <= 1.4) {
-    recommendedCapacity = '1 KW';
-    numericKw = 1;
-  } else if (rawKwNeeded <= 2.4) {
-    recommendedCapacity = '2 KW';
-    numericKw = 2;
-  } else if (rawKwNeeded <= 4.2) {
-    recommendedCapacity = '3 KW';
-    numericKw = 3;
-  } else if (rawKwNeeded <= 7.5) {
-    recommendedCapacity = '5 KW';
-    numericKw = 5;
-  } else {
-    recommendedCapacity = '10 KW+';
-    numericKw = 10;
-  }
-
-  const estimatedMonthlyUnitsGen = numericKw * 130;
-  const estimatedMonthlySavings = Math.min(monthlyBill, Math.round(estimatedMonthlyUnitsGen * tariffPerUnit));
+  const monthlyGeneration = Math.round(calculatedKw * 125);
+  const estimatedMonthlySavings = Math.round(Math.min(monthlyBill * 0.9, monthlyGeneration * unitRate));
   const estimatedAnnualSavings = estimatedMonthlySavings * 12;
-  const requiredRoofSqFt = numericKw * 95;
-
-  const handleApply = () => {
-    const notes = `Calculated via Solar Estimator: Current Bill ₹${monthlyBill.toLocaleString('en-IN')}/mo (${propertyType}), Recommended: ${recommendedCapacity}, Approx Roof: ~${requiredRoofSqFt} sq. ft.`;
-    onApplyCalculatedCapacity(recommendedCapacity, notes);
-  };
+  const twentyFiveYearSavings = estimatedAnnualSavings * 25;
+  const requiredRoofArea = Math.round(calculatedKw * 80);
 
   return (
-    <section id="calculator" className="py-28 bg-[#080B11] border-b border-slate-800/80 relative">
-      <div className="container-custom">
+    <section id="calculator" className="py-16 sm:py-24 bg-[#FAFBF5] text-[#121416] border-t border-[rgba(18,20,22,0.08)]">
+      
+      <div className="container-custom space-y-12">
         
         {/* Section Header */}
-        <div className="max-w-4xl mb-16">
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-500 block mb-3">
-            04 / Estimation Instrument
+        <div className="space-y-2 max-w-2xl">
+          <span className="font-display text-[11px] font-bold text-[#686F76] uppercase tracking-wider block">
+            SAVINGS & YIELD CALCULATOR
           </span>
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white uppercase tracking-tight leading-[1.08]">
-            Solar Sizing & <br />
-            <span className="text-amber-400">
-              Savings Estimator
-            </span>
+          <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[#121416] uppercase tracking-tight">
+            ESTIMATE YOUR ENERGY GENERATION.
           </h2>
-          <p className="text-sm sm:text-base text-slate-300 max-w-xl font-light leading-relaxed mt-4">
-            Adjust your average monthly power bill to calculate the recommended solar system scale, rooftop area requirement, and approximate annual bill reduction.
+          <p className="text-xs sm:text-sm text-[#686F76]">
+            Calculated from Rajasthan solar irradiance and current DISCOM electricity tariffs.
           </p>
         </div>
 
-        {/* Estimation Instrument Frame */}
-        <div className="border border-slate-800 bg-slate-900/60 p-8 sm:p-14 shadow-2xl rounded-sm">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        {/* Clean Split Layout from Reference Philosophy */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+          
+          {/* Left: Inputs (6 cols) */}
+          <div className="lg:col-span-6 bg-white border border-[rgba(18,20,22,0.09)] rounded-sm p-6 sm:p-8 flex flex-col justify-between shadow-xs space-y-6">
             
-            {/* Input Controls (6 cols) */}
-            <div className="lg:col-span-6 space-y-8">
+            <div className="space-y-6">
               
-              {/* Category Mode */}
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => setPropertyType('residential')}
-                  className={`py-2.5 px-4 rounded-sm text-xs font-mono font-bold transition-all border flex items-center gap-2 ${
-                    propertyType === 'residential'
-                      ? 'bg-amber-500 text-amber-950 border-amber-400'
-                      : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
-                  }`}
-                >
-                  <Home className="w-3.5 h-3.5" />
-                  <span>Residential (Home)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPropertyType('commercial')}
-                  className={`py-2.5 px-4 rounded-sm text-xs font-mono font-bold transition-all border flex items-center gap-2 ${
-                    propertyType === 'commercial'
-                      ? 'bg-amber-500 text-amber-950 border-amber-400'
-                      : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
-                  }`}
-                >
-                  <Building className="w-3.5 h-3.5" />
-                  <span>Commercial (Shop/Office)</span>
-                </button>
+              {/* Tariff Category */}
+              <div>
+                <label className="font-display text-xs font-bold uppercase tracking-wider text-[#121416] block mb-2">
+                  Connection Category
+                </label>
+                <div className="grid grid-cols-2 gap-3 font-display text-xs">
+                  <button
+                    onClick={() => setTariffType('residential')}
+                    className={`py-2.5 px-4 rounded-sm border transition-all ${
+                      tariffType === 'residential'
+                        ? 'bg-[#121416] text-white font-bold border-[#121416]'
+                        : 'bg-[#F2F2EF] text-[#686F76] border-transparent hover:text-[#121416]'
+                    }`}
+                  >
+                    Domestic / Residential
+                  </button>
+                  <button
+                    onClick={() => setTariffType('commercial')}
+                    className={`py-2.5 px-4 rounded-sm border transition-all ${
+                      tariffType === 'commercial'
+                        ? 'bg-[#121416] text-white font-bold border-[#121416]'
+                        : 'bg-[#F2F2EF] text-[#686F76] border-transparent hover:text-[#121416]'
+                    }`}
+                  >
+                    Commercial / 3-Phase
+                  </button>
+                </div>
               </div>
 
-              {/* Prominent Monthly Bill */}
-              <div>
-                <span className="text-xs font-mono text-slate-400 uppercase tracking-wider block mb-2">
-                  Average Monthly Electricity Bill:
-                </span>
-                <div className="text-4xl sm:text-5xl md:text-6xl font-black text-amber-400 font-mono tracking-tight mb-4">
-                  ₹{monthlyBill.toLocaleString('en-IN')}
+              {/* Monthly Bill Slider */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-display text-xs font-bold uppercase text-[#121416]">
+                    Average Monthly Electricity Bill
+                  </span>
+                  <strong className="font-display text-2xl font-extrabold text-[#121416]">
+                    ₹{monthlyBill.toLocaleString('en-IN')}
+                  </strong>
                 </div>
 
                 <input
                   type="range"
-                  min="1000"
-                  max="35000"
-                  step="500"
+                  min={1500}
+                  max={35000}
+                  step={500}
                   value={monthlyBill}
                   onChange={(e) => setMonthlyBill(Number(e.target.value))}
-                  className="w-full h-2.5 bg-slate-800 rounded-none appearance-none cursor-pointer accent-amber-500"
+                  className="w-full cursor-pointer"
                 />
 
-                <div className="flex justify-between text-xs font-mono text-slate-500 mt-2">
-                  <span>₹1,000</span>
-                  <span>₹15,000</span>
-                  <span>₹35,000+</span>
+                <div className="flex justify-between text-[11px] text-[#686F76]">
+                  <span>₹1,500/mo</span>
+                  <span>₹10,000/mo</span>
+                  <span>₹20,000/mo</span>
+                  <span>₹35,000+/mo</span>
                 </div>
               </div>
 
-              <div className="text-xs font-mono text-slate-400 pt-2 border-t border-slate-800">
-                Calculated Consumption: <strong className="text-white">~{monthlyUnitsConsumed} Units / month</strong>
+              {/* Quick Bill Selectors */}
+              <div className="pt-2">
+                <span className="text-[10px] uppercase font-display font-bold text-[#686F76] block mb-2">
+                  Common Monthly Baselines:
+                </span>
+                <div className="flex flex-wrap gap-2 text-xs">
+                  {[2500, 4500, 7500, 12000, 20000].map((val) => (
+                    <button
+                      key={val}
+                      onClick={() => setMonthlyBill(val)}
+                      className={`px-3 py-1.5 rounded-sm border text-xs font-display transition-all ${
+                        monthlyBill === val
+                          ? 'bg-[#121416] text-white border-[#121416] font-bold'
+                          : 'bg-[#F2F2EF] text-[#686F76] border-transparent hover:text-[#121416]'
+                      }`}
+                    >
+                      ₹{val.toLocaleString('en-IN')}
+                    </button>
+                  ))}
+                </div>
               </div>
 
             </div>
 
-            {/* Dominant Output Display (6 cols) */}
-            <div className="lg:col-span-6 lg:pl-10 lg:border-l border-slate-800 space-y-8">
-              
-              <div>
-                <span className="text-xs font-mono uppercase text-slate-400 block mb-1">
-                  Recommended System Scale
-                </span>
-                <div className="text-4xl sm:text-5xl md:text-6xl font-black text-white tracking-tight">
-                  {recommendedCapacity}
-                </div>
-                <div className="text-xs font-mono text-slate-400 mt-1">
-                  Estimated generation: ~{estimatedMonthlyUnitsGen} Units / month
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-6 pt-6 border-t border-slate-800">
-                <div>
-                  <span className="text-xs font-mono uppercase text-slate-400 block mb-1">
-                    Estimated Annual Savings:
-                  </span>
-                  <div className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono">
-                    ₹{estimatedAnnualSavings.toLocaleString('en-IN')}
-                  </div>
-                  <span className="text-[11px] text-slate-400 block font-mono mt-0.5">approximate per year</span>
-                </div>
-
-                <div>
-                  <span className="text-xs font-mono uppercase text-slate-400 block mb-1">
-                    Roof Space Required:
-                  </span>
-                  <div className="text-2xl sm:text-3xl font-black text-slate-200 font-mono">
-                    ~{requiredRoofSqFt} <span className="text-xs font-sans font-normal text-slate-400">sq. ft.</span>
-                  </div>
-                  <span className="text-[11px] text-slate-400 block font-mono mt-0.5">unshaded rooftop</span>
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  onClick={handleApply}
-                  className="btn-primary w-full py-3.5 text-xs sm:text-sm font-semibold flex items-center justify-center gap-2"
-                >
-                  <span>Transfer Sizing to Consultation Form</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-
-              <p className="text-[11px] text-slate-500 font-mono leading-relaxed">
-                * Note: Output figures are approximate engineering estimates based on 4.5–5 peak sun hours in Rajasthan. Actual savings depend on rooftop angle and local utility billing.
-              </p>
-
+            <div className="p-4 bg-[#F2F2EF] rounded-sm text-xs text-[#686F76] flex items-center gap-3">
+              <Sun className="w-4 h-4 text-[#C46A38] shrink-0" />
+              <span>
+                Estimated monthly consumption: <strong className="text-[#121416]">~{estimatedMonthlyUnits} units</strong>. Sized for ~85–90% bill offset.
+              </span>
             </div>
 
           </div>
+
+          {/* Right: Output (6 cols) */}
+          <div className="lg:col-span-6 bg-white border border-[rgba(18,20,22,0.09)] rounded-sm p-6 sm:p-8 flex flex-col justify-between shadow-xs space-y-6">
+            
+            <div>
+              <div className="flex items-center justify-between pb-4 border-b border-[rgba(18,20,22,0.08)]">
+                <span className="font-display text-xs font-bold uppercase tracking-wider text-[#686F76]">
+                  Recommended System Scale
+                </span>
+                <span className="text-[10px] font-display font-bold px-2 py-0.5 rounded-xs bg-[#F2F2EF] text-[#121416]">
+                  OPTIMAL SIZING
+                </span>
+              </div>
+
+              <div className="py-6 space-y-1">
+                <h3 className="font-display font-extrabold text-3xl sm:text-4xl text-[#121416] uppercase">
+                  {recommendedCapacity} System
+                </h3>
+                <span className="text-xs text-[#686F76] block">
+                  ({calculatedKw} kW Capacity • ~{monthlyGeneration} Units/Month)
+                </span>
+              </div>
+            </div>
+
+            {/* Output Metric Tiles */}
+            <div className="grid grid-cols-2 gap-3 text-xs">
+              
+              <div className="p-4 bg-[#FAFBF5] border border-[rgba(18,20,22,0.08)] rounded-sm space-y-1">
+                <span className="text-[#686F76] text-[10px] uppercase font-bold block">Est. Annual Savings</span>
+                <strong className="text-xl font-display font-bold text-[#121416] block">
+                  ₹{estimatedAnnualSavings.toLocaleString('en-IN')}
+                </strong>
+                <span className="text-[10px] text-[#686F76]">~₹{estimatedMonthlySavings.toLocaleString('en-IN')} / month</span>
+              </div>
+
+              <div className="p-4 bg-[#FAFBF5] border border-[rgba(18,20,22,0.08)] rounded-sm space-y-1">
+                <span className="text-[#686F76] text-[10px] uppercase font-bold block">25-Year Asset Yield</span>
+                <strong className="text-xl font-display font-bold text-[#C46A38] block">
+                  ₹{(twentyFiveYearSavings / 100000).toFixed(1)} Lakhs
+                </strong>
+                <span className="text-[10px] text-[#686F76]">Lifetime value</span>
+              </div>
+
+              <div className="p-4 bg-[#FAFBF5] border border-[rgba(18,20,22,0.08)] rounded-sm space-y-1 col-span-2 flex items-center justify-between">
+                <div>
+                  <span className="text-[#686F76] text-[10px] uppercase font-bold block">Rooftop Area Required</span>
+                  <strong className="text-sm font-display font-bold text-[#121416] block">
+                    ~{requiredRoofArea} sq. ft.
+                  </strong>
+                </div>
+                <span className="text-[10px] text-[#686F76]">
+                  Shadow-free terrace space
+                </span>
+              </div>
+
+            </div>
+
+            {/* Apply Sizing CTA */}
+            <button
+              onClick={() => {
+                onSelectCapacity(recommendedCapacity);
+                onOpenQuote();
+              }}
+              className="btn-primary-dark text-xs py-3.5 px-6 w-full"
+            >
+              <span>APPLY {recommendedCapacity} SIZING TO FREE QUOTE</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
+          </div>
+
         </div>
 
       </div>
+
     </section>
   );
 };

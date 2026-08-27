@@ -28,35 +28,34 @@ export const FloatingActions: React.FC<FloatingActionsProps> = ({ onOpenQuote })
         {showScrollTop && (
           <button
             onClick={scrollToTop}
-            className="w-10 h-10 rounded-sm bg-[#0D121C] border border-slate-700 text-slate-300 hover:text-white hover:border-amber-500 flex items-center justify-center shadow-2xl transition-all"
+            className="w-9 h-9 rounded-sm bg-white border border-[rgba(18,20,22,0.12)] text-[#121416] hover:bg-[#FAFBF5] flex items-center justify-center shadow-md transition-all"
             aria-label="Scroll to top of page"
           >
-            <ArrowUp className="w-4 h-4 text-amber-400" />
+            <ArrowUp className="w-4 h-4" />
           </button>
         )}
 
-        {/* WhatsApp Floating Trigger */}
         <a
           href={BUSINESS_INFO.whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="py-2.5 px-4 rounded-sm bg-[#0D121C] hover:bg-[#121824] text-xs font-mono font-bold text-slate-200 border border-emerald-500/50 hover:border-emerald-400 flex items-center gap-2 shadow-2xl transition-all"
+          className="py-2.5 px-4 rounded-sm bg-[#121416] hover:bg-black text-xs font-display font-bold text-white flex items-center gap-2 shadow-lg transition-all"
           aria-label="Direct WhatsApp Consultation"
         >
-          <MessageSquare className="w-4 h-4 text-emerald-400" />
+          <MessageSquare className="w-4 h-4 text-[#C46A38]" />
           <span>WhatsApp Direct</span>
         </a>
       </div>
 
       {/* Mobile Bottom Sticky Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-[#080B11]/95 border-t border-slate-800 p-2 backdrop-blur-md">
+      <div className="fixed bottom-0 left-0 right-0 z-40 sm:hidden bg-white/95 border-t border-[rgba(18,20,22,0.1)] p-2 backdrop-blur-md">
         <div className="grid grid-cols-3 gap-2">
           
           <a
             href={BUSINESS_INFO.phoneTel}
-            className="py-2.5 px-2 text-xs flex items-center justify-center gap-1.5 rounded-sm bg-slate-900 border border-slate-800 text-slate-200 font-mono font-bold hover:bg-slate-800 transition-colors"
+            className="py-2.5 px-2 text-xs flex items-center justify-center gap-1.5 rounded-sm bg-[#F2F2EF] text-[#121416] font-display font-bold hover:bg-[#E6E0D6] transition-colors"
           >
-            <Phone className="w-3.5 h-3.5 text-amber-400" />
+            <Phone className="w-3.5 h-3.5" />
             <span>Call</span>
           </a>
 
@@ -64,18 +63,18 @@ export const FloatingActions: React.FC<FloatingActionsProps> = ({ onOpenQuote })
             href={BUSINESS_INFO.whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="py-2.5 px-2 text-xs flex items-center justify-center gap-1.5 rounded-sm bg-slate-900 border border-slate-800 text-slate-200 font-mono font-bold hover:bg-slate-800 transition-colors"
+            className="py-2.5 px-2 text-xs flex items-center justify-center gap-1.5 rounded-sm bg-[#F2F2EF] text-[#121416] font-display font-bold hover:bg-[#E6E0D6] transition-colors"
           >
-            <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+            <MessageSquare className="w-3.5 h-3.5 text-[#C46A38]" />
             <span>WhatsApp</span>
           </a>
 
           <button
             onClick={onOpenQuote}
-            className="btn-primary py-2.5 px-2 text-xs flex items-center justify-center gap-1.5 font-mono font-bold"
+            className="btn-primary-dark py-2.5 px-2 text-xs flex items-center justify-center gap-1.5 font-display font-bold"
           >
             <Send className="w-3.5 h-3.5" />
-            <span>Quote</span>
+            <span>Survey</span>
           </button>
 
         </div>

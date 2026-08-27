@@ -14,7 +14,7 @@ import { AdminLayout } from './components/admin/AdminLayout';
 
 import { enquiryService } from './services/enquiryService';
 import { galleryService } from './services/galleryService';
-import type { SolarCapacityOption, ServiceDetail, SolarEnquiry, GalleryProject } from './types';
+import type { SolarCapacityOption, SolarEnquiry, GalleryProject } from './types';
 
 export function App() {
   const [isAdminOpen, setIsAdminOpen] = useState<boolean>(false);
@@ -30,23 +30,11 @@ export function App() {
     }
   };
 
-  const handleSelectCapacity = (capacity?: string) => {
+  const handleSelectCapacity = (capacity?: SolarCapacityOption) => {
     if (capacity) {
-      setSelectedCapacity(capacity as SolarCapacityOption);
-      setInitialFormMessage(`Interested in ${capacity} solar panel system installation.`);
+      setSelectedCapacity(capacity);
+      setInitialFormMessage(`Interested in ${capacity} solar panel system installation in Dausa.`);
     }
-    scrollToContact();
-  };
-
-  const handleSelectService = (service: ServiceDetail) => {
-    setSelectedCapacity(service.defaultCapacity);
-    setInitialFormMessage(`Requirement for ${service.title}: ${service.tagline}`);
-    scrollToContact();
-  };
-
-  const handleApplyCalculatedCapacity = (capacity: SolarCapacityOption, notes: string) => {
-    setSelectedCapacity(capacity);
-    setInitialFormMessage(notes);
     scrollToContact();
   };
 
@@ -54,7 +42,7 @@ export function App() {
     setEnquiries(enquiryService.getEnquiries());
   };
 
-  // If Admin mode is toggled
+  // If Admin Operations mode is active
   if (isAdminOpen) {
     return (
       <AdminLayout
@@ -68,9 +56,9 @@ export function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col font-sans selection:bg-amber-400 selection:text-amber-950">
+    <div className="min-h-screen bg-[#FAFBF5] text-[#121416] flex flex-col font-body selection:bg-[#121416] selection:text-white">
       
-      {/* Navigation Header */}
+      {/* 1. Header matching Reference Image */}
       <Header
         onOpenQuote={() => {
           setSelectedCapacity('3 KW');
@@ -79,50 +67,47 @@ export function App() {
         onOpenAdmin={() => setIsAdminOpen(true)}
       />
 
-      {/* Main Public Website Content */}
-      <main className="flex-1">
+      {/* Main Experience */}
+      <main className="flex-1 relative z-10">
         
-        {/* 1. Hero Section */}
+        {/* 2. Hero matching Reference Composition */}
         <Hero
-          onSelectCapacity={handleSelectCapacity}
           onOpenQuote={() => {
             setSelectedCapacity('3 KW');
             scrollToContact();
           }}
         />
 
-        {/* 2. Editorial About / Engineering Philosophy */}
-        <About
-          onOpenQuote={() => {
-            setSelectedCapacity('3 KW');
-            scrollToContact();
-          }}
-        />
+        {/* 3. About / Why Radhe Electrical from Reference */}
+        <About />
 
-        {/* 3. Specialized Services Application Groups */}
-        <Services
-          onSelectService={handleSelectService}
-        />
-
-        {/* 4. Solar Capacities & Sizing Guide */}
+        {/* 4. Popular Solar Systems from Reference */}
         <SolarCapacity
-          onSelectCapacity={(cap) => handleSelectCapacity(cap)}
+          onSelectCapacity={handleSelectCapacity}
+          onOpenQuote={scrollToContact}
         />
 
-        {/* 5. Solar Savings & Rooftop Estimator */}
+        {/* 5. Services & Capabilities */}
+        <Services
+          onSelectCapacity={handleSelectCapacity}
+          onOpenQuote={scrollToContact}
+        />
+
+        {/* 6. Savings & Yield Calculator */}
         <SavingsCalculator
-          onApplyCalculatedCapacity={handleApplyCalculatedCapacity}
+          onSelectCapacity={handleSelectCapacity}
+          onOpenQuote={scrollToContact}
         />
 
-        {/* 6. Why Choose Us Trust Pillars */}
+        {/* 7. Craft Standards Sequence */}
         <WhyChooseUs />
 
-        {/* 7. Field Project Gallery & Case Studies */}
+        {/* 8. Portfolio & Case Studies */}
         <ProjectGallery
           projects={galleryProjects}
         />
 
-        {/* 8. Unified Consultation Hub & Office Depot Location */}
+        {/* 9. Consultation Terminal matching Reference Form Elements */}
         <SolarEnquiryForm
           selectedCapacity={selectedCapacity}
           initialMessage={initialFormMessage}
@@ -131,12 +116,12 @@ export function App() {
 
       </main>
 
-      {/* Footer */}
+      {/* 10. Minimal Architectural Footer */}
       <Footer
         onOpenAdmin={() => setIsAdminOpen(true)}
       />
 
-      {/* Floating Action Buttons */}
+      {/* Floating Conversion Actions */}
       <FloatingActions
         onOpenQuote={() => {
           setSelectedCapacity('3 KW');

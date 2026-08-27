@@ -1,124 +1,115 @@
-import { Phone, MessageSquare, MapPin, Shield } from 'lucide-react';
+import React from 'react';
+import { ArrowUp, Shield, MessageSquare } from 'lucide-react';
 import { BUSINESS_INFO } from '../data/mockData';
 
 interface FooterProps {
   onOpenAdmin: () => void;
 }
 
-export const Footer = ({ onOpenAdmin }: FooterProps) => {
+export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <footer className="bg-[#05070B] text-slate-400 text-xs pt-24 pb-20 border-t border-slate-900">
-      <div className="container-custom">
+    <footer className="bg-[#FAFBF5] text-[#121416] border-t border-[rgba(18,20,22,0.08)] pt-12 pb-8">
+      
+      <div className="container-custom space-y-10">
         
-        {/* Massive Brand Statement & Coordinates */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 pb-16 border-b border-slate-900 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8">
           
-          <div className="lg:col-span-6 space-y-6">
-            <h3 className="font-display font-black text-3xl sm:text-4xl text-white tracking-tight uppercase">
-              RADHE <span className="text-amber-500 font-light">ELECTRICAL</span>
-            </h3>
-            <p className="text-sm text-slate-400 max-w-md font-light leading-relaxed">
-              Complete solar panel installation solutions and galvanized mounting structures for residential and commercial rooftops in Dausa, Rajasthan.
+          {/* Brand & Location (4 cols) */}
+          <div className="lg:col-span-4 space-y-3">
+            <div className="flex flex-col leading-none">
+              <span className="font-display font-extrabold text-[#121416] text-lg uppercase tracking-wider">
+                RADHE
+              </span>
+              <span className="font-display font-bold text-[#121416] text-sm uppercase tracking-widest">
+                ELECTRICAL
+              </span>
+            </div>
+
+            <p className="text-xs text-[#686F76] leading-relaxed max-w-xs">
+              Complete rooftop and commercial solar panel installation solutions in Dausa, Rajasthan.
             </p>
-            <div className="text-xs font-mono text-amber-500/80">
-              Near Giriraj Dharan Temple, Agra Road, Dausa
+
+            <div className="text-[11px] text-[#686F76]">
+              Near Giriraj Dharan Mandir, Agra Road (PIN 303303)
             </div>
           </div>
 
-          <div className="lg:col-span-3 space-y-3">
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-white block mb-4">
+          {/* Navigation (4 cols) */}
+          <div className="lg:col-span-4 space-y-2 text-xs font-display font-semibold">
+            <span className="text-[10px] text-[#8E959D] uppercase tracking-wider block font-bold">
               Navigation
             </span>
-            <ul className="space-y-3 font-mono text-xs">
-              <li>
-                <a href="#services" className="hover:text-amber-400 transition-colors">
-                  01 / Services
-                </a>
-              </li>
-              <li>
-                <a href="#capacities" className="hover:text-amber-400 transition-colors">
-                  02 / System Scale
-                </a>
-              </li>
-              <li>
-                <a href="#calculator" className="hover:text-amber-400 transition-colors">
-                  03 / Estimator
-                </a>
-              </li>
-              <li>
-                <a href="#gallery" className="hover:text-amber-400 transition-colors">
-                  04 / Portfolio
-                </a>
-              </li>
-              <li>
-                <a href="#contact" className="hover:text-amber-400 transition-colors">
-                  05 / Contact & Location
-                </a>
-              </li>
-              <li className="pt-2 border-t border-slate-900">
-                <button
-                  onClick={onOpenAdmin}
-                  className="text-slate-400 hover:text-amber-400 transition-colors flex items-center gap-1.5 text-xs font-mono"
-                >
-                  <Shield className="w-3 h-3 text-amber-500" />
-                  <span>06 / Staff & Admin Portal</span>
-                </button>
-              </li>
-            </ul>
+            <div className="grid grid-cols-2 gap-2">
+              <a href="#" className="text-[#686F76] hover:text-[#121416] transition-colors">Home</a>
+              <a href="#about" className="text-[#686F76] hover:text-[#121416] transition-colors">About</a>
+              <a href="#services" className="text-[#686F76] hover:text-[#121416] transition-colors">Services</a>
+              <a href="#capacity" className="text-[#686F76] hover:text-[#121416] transition-colors">Solar Systems</a>
+              <a href="#projects" className="text-[#686F76] hover:text-[#121416] transition-colors">Projects</a>
+              <a href="#calculator" className="text-[#686F76] hover:text-[#121416] transition-colors">Calculator</a>
+              <a href="#contact" className="text-[#686F76] hover:text-[#121416] transition-colors">Contact</a>
+              <button
+                onClick={onOpenAdmin}
+                className="text-left text-[#686F76] hover:text-[#121416] transition-colors flex items-center gap-1 font-bold"
+              >
+                <Shield className="w-3 h-3 text-[#C46A38]" />
+                <span>Staff Portal</span>
+              </button>
+            </div>
           </div>
 
-          <div className="lg:col-span-3 space-y-4">
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-white block mb-4">
-              Direct Contact
+          {/* Contact Details (4 cols) */}
+          <div className="lg:col-span-4 space-y-2 text-xs">
+            <span className="text-[10px] font-display font-bold text-[#8E959D] uppercase tracking-wider block">
+              Contact & Hotline
             </span>
-            <div className="space-y-3 text-xs">
-              <div className="flex items-start gap-2.5">
-                <MapPin className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />
-                <span>{BUSINESS_INFO.location}</span>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Phone className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                <a href={BUSINESS_INFO.phoneTel} className="text-white font-bold font-mono hover:text-amber-400">
-                  {BUSINESS_INFO.phoneDisplay}
-                </a>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <MessageSquare className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                <a
-                  href={BUSINESS_INFO.whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-emerald-400"
-                >
-                  WhatsApp Consultation
-                </a>
-              </div>
+            <div className="space-y-1.5 text-[#686F76]">
+              <div>Phone: +91 9982861558</div>
+              <div>Hours: Mon – Sun: 8:00 AM – 8:00 PM</div>
+              <a
+                href={BUSINESS_INFO.whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-[#121416] font-display font-bold hover:underline pt-1"
+              >
+                <MessageSquare className="w-3.5 h-3.5 text-[#C46A38]" />
+                <span>WhatsApp Direct Chat</span>
+              </a>
             </div>
           </div>
 
         </div>
 
-        {/* Minimal Bottom Line */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] font-mono text-slate-600">
+        {/* Bottom Bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#8E959D] pt-6 border-t border-[rgba(18,20,22,0.06)] gap-4">
           <div>
-            © {new Date().getFullYear()} RADHE ELECTRICAL · Dausa, Rajasthan.
+            © {new Date().getFullYear()} RADHE ELECTRICAL. All rights reserved. Dausa, Rajasthan.
           </div>
 
-          <div className="flex items-center gap-6">
-            <a href="#hero" className="hover:text-slate-400 transition-colors">
-              Back to Top ↑
-            </a>
+          <div className="flex items-center gap-5">
             <button
               onClick={onOpenAdmin}
-              className="hover:text-amber-400 transition-colors flex items-center gap-1.5 text-slate-500"
+              className="text-[#686F76] hover:text-[#121416] flex items-center gap-1 font-bold"
             >
-              <Shield className="w-3 h-3" />
-              <span>Admin Gateway</span>
+              <Shield className="w-3 h-3 text-[#C46A38]" />
+              <span>Admin Login</span>
+            </button>
+
+            <button
+              onClick={scrollToTop}
+              className="hover:text-[#121416] flex items-center gap-1 transition-colors"
+            >
+              <span>Back to top</span>
+              <ArrowUp className="w-3 h-3 text-[#121416]" />
             </button>
           </div>
         </div>
 
       </div>
+
     </footer>
   );
 };

@@ -1,163 +1,165 @@
-import { useState } from 'react';
-import { Maximize2, MapPin, X, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import React, { useState, useRef, useCallback } from 'react';
+import { MapPin, Eye, X, ArrowLeft, ArrowRight } from 'lucide-react';
 import type { GalleryProject } from '../types';
 
 interface ProjectGalleryProps {
   projects: GalleryProject[];
 }
 
-export const ProjectGallery = ({ projects }: ProjectGalleryProps) => {
+export const ProjectGallery: React.FC<ProjectGalleryProps> = ({ projects }) => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
-  const [activeLightboxIndex, setActiveLightboxIndex] = useState<number | null>(null);
-  const [beforeAfterSliderPos, setBeforeAfterSliderPos] = useState<number>(50);
+  const [selectedProject, setSelectedProject] = useState<GalleryProject | null>(null);
+  
+  // Before / After Slider State
+  const [sliderPos, setSliderPos] = useState<number>(50);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const sliderRef = useRef<HTMLDivElement | null>(null);
+
+  const handleSliderMove = useCallback(
+    (clientX: number) => {
+      if (!sliderRef.current) return;
+      const rect = sliderRef.current.getBoundingClientRect();
+      const x = clientX - rect.left;
+      const percent = Math.min(Math.max((x / rect.width) * 100, 5), 95);
+      setSliderPos(percent);
+    },
+    []
+  );
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length > 0) {
+      handleSliderMove(e.touches[0].clientX);
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      handleSliderMove(e.clientX);
+    }
+  };
 
   const categories = [
     { id: 'all', label: 'All Projects' },
-    { id: 'residential', label: 'Residential Rooftops' },
-    { id: 'commercial', label: 'Commercial Systems' },
-    { id: 'rooftop', label: 'Elevated Pergolas' },
-    { id: 'inverter', label: 'Inverters & Hardware' },
+    { id: 'residential', label: 'Residential Pergolas' },
+    { id: 'commercial', label: 'Commercial 3-Phase' },
+    { id: 'inverter', label: 'Hardware & Structure' },
   ];
 
-  const filteredProjects = activeCategory === 'all'
-    ? projects
-    : projects.filter((p) => p.category === activeCategory);
-
-  const featuredProject = filteredProjects[0] || projects[0];
-  const supportingProjects = filteredProjects.slice(1);
-
-  const handleSliderMove = (clientX: number, rect: DOMRect) => {
-    const x = clientX - rect.left;
-    const pos = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    setBeforeAfterSliderPos(pos);
-  };
-
-  const currentLightboxProject = activeLightboxIndex !== null ? filteredProjects[activeLightboxIndex] : null;
+  const filteredProjects = projects.filter((p) => {
+    if (activeCategory === 'all') return true;
+    return p.category === activeCategory;
+  });
 
   return (
-    <section id="gallery" className="py-28 bg-[#080B11] border-b border-slate-800/80 relative">
-      <div className="container-custom">
+    <section id="projects" className="py-16 sm:py-24 bg-[#FAFBF5] text-[#121416] border-t border-[rgba(18,20,22,0.08)]">
+      
+      <div className="container-custom space-y-12">
         
         {/* Section Header */}
-        <div className="max-w-4xl mb-16">
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-500 block mb-3">
-            06 / Architectural Portfolio
-          </span>
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white uppercase tracking-tight leading-[1.08]">
-            Completed Solar Projects in <br />
-            <span className="text-amber-400">
-              Dausa & Eastern Rajasthan
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[rgba(18,20,22,0.08)]">
+          <div className="space-y-2 max-w-xl">
+            <span className="font-display text-[11px] font-bold text-[#686F76] uppercase tracking-wider block">
+              PORTFOLIO & CASE STUDIES
             </span>
-          </h2>
-          <p className="text-sm sm:text-base text-slate-300 max-w-xl font-light leading-relaxed mt-4">
-            A portfolio of real rooftop solar installations, elevated pergolas, and commercial arrays built for long-term generation performance.
+            <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[#121416] uppercase tracking-tight">
+              ROOFTOP INSTALLATIONS IN DAUSA.
+            </h2>
+          </div>
+
+          <p className="text-xs sm:text-sm text-[#686F76] max-w-xs">
+            Verified installations across Dausa, Agra Road, Bandikui, and Eastern Rajasthan.
           </p>
         </div>
 
-        {/* Featured Case Study: Interactive Before & After Rooftop Transformation */}
-        <div className="mb-24 border border-slate-800 bg-slate-900/60 p-8 sm:p-12 shadow-2xl rounded-sm">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-            
-            {/* Case Study Meta (5 cols) */}
-            <div className="lg:col-span-5 space-y-5">
-              <span className="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold block">
-                [ Transformation Case Study ]
+        {/* FEATURED TRANSFORMATION: Interactive Before / After Slider */}
+        <div className="bg-white border border-[rgba(18,20,22,0.09)] rounded-sm p-6 sm:p-8 shadow-xs space-y-6">
+          
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <span className="text-[10px] font-display uppercase tracking-widest text-[#C46A38] font-bold block mb-1">
+                Featured Terrace Transformation
               </span>
-              <h3 className="text-2xl sm:text-3xl font-bold text-white uppercase tracking-tight leading-tight">
-                5 KW Elevated Pergola Structure
+              <h3 className="font-display font-bold text-xl sm:text-2xl text-[#121416]">
+                5 KW Elevated Pergola Terrace Setup
               </h3>
-              <p className="text-sm text-slate-300 font-light leading-relaxed">
-                Transformed an unshaded concrete terrace into a high-yield 5 KW solar pergola structure, generating clean energy while providing a covered, usable outdoor terrace area for the home.
-              </p>
-
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-800 text-xs font-mono">
-                <div>
-                  <span className="text-slate-400 block mb-1">System Scale:</span>
-                  <strong className="text-amber-400 text-base">5 KW System</strong>
-                </div>
-                <div>
-                  <span className="text-slate-400 block mb-1">Location:</span>
-                  <strong className="text-slate-200 text-sm">Dausa, Rajasthan</strong>
-                </div>
-              </div>
-
-              <div className="text-xs font-mono text-slate-400 pt-1">
-                ↔ <span className="text-slate-200">Drag the vertical bar</span> to inspect before and after installation.
-              </div>
             </div>
-
-            {/* Before / After Visual Slider (7 cols) */}
-            <div className="lg:col-span-7">
-              <div
-                className="before-after-container aspect-[16/10] sm:aspect-[16/9] relative cursor-ew-resize overflow-hidden"
-                onMouseDown={() => setIsDragging(true)}
-                onMouseUp={() => setIsDragging(false)}
-                onMouseLeave={() => setIsDragging(false)}
-                onMouseMove={(e) => {
-                  if (isDragging) {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    handleSliderMove(e.clientX, rect);
-                  }
-                }}
-                onTouchMove={(e) => {
-                  const touch = e.touches[0];
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  handleSliderMove(touch.clientX, rect);
-                }}
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  handleSliderMove(e.clientX, rect);
-                }}
-              >
-                <img
-                  src="/images/after-terrace.jpg"
-                  alt="After: 5 KW Solar Pergola Installation"
-                  className="w-full h-full object-cover select-none"
-                />
-                <div className="absolute top-4 right-4 bg-amber-500 text-amber-950 text-[11px] font-mono font-bold px-3 py-1 rounded shadow">
-                  AFTER / 5 KW Solar Pergola
-                </div>
-
-                <div
-                  className="absolute inset-0 overflow-hidden select-none"
-                  style={{ width: `${beforeAfterSliderPos}%` }}
-                >
-                  <img
-                    src="/images/before-terrace.jpg"
-                    alt="Before: Empty Concrete Terrace"
-                    className="w-full h-full object-cover max-w-none"
-                    style={{ width: '100%', minWidth: '100%' }}
-                  />
-                  <div className="absolute top-4 left-4 bg-slate-950/90 text-slate-200 text-[11px] font-mono font-bold px-3 py-1 rounded shadow border border-slate-700">
-                    BEFORE / Bare Terrace
-                  </div>
-                </div>
-
-                <div
-                  className="before-after-slider"
-                  style={{ left: `${beforeAfterSliderPos}%` }}
-                >
-                  <div className="before-after-handle">
-                    <span>↔</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
+            <span className="text-xs font-display text-[#686F76] bg-[#F2F2EF] px-3 py-1.5 rounded-xs self-start sm:self-auto">
+              Near Giriraj Dharan Mandir, Agra Road, Dausa
+            </span>
           </div>
+
+          {/* Slider Frame */}
+          <div
+            ref={sliderRef}
+            className="relative aspect-[16/9] sm:aspect-[21/9] rounded-sm overflow-hidden select-none cursor-ew-resize border border-[rgba(18,20,22,0.1)] shadow-xs"
+            onMouseDown={() => setIsDragging(true)}
+            onMouseUp={() => setIsDragging(false)}
+            onMouseLeave={() => setIsDragging(false)}
+            onMouseMove={handleMouseMove}
+            onTouchMove={handleTouchMove}
+          >
+            {/* After Image (Full Background) */}
+            <img
+              src="/images/after-terrace.jpg"
+              alt="Completed 5 KW elevated solar pergola installation on rooftop in Dausa"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <span className="absolute top-4 right-4 bg-[#121416] text-white font-display text-xs font-bold px-3 py-1 rounded-xs shadow-sm z-10">
+              AFTER: 5 KW SOLAR PERGOLA
+            </span>
+
+            {/* Before Image (Clipped Overlay with Hardware-Accelerated ClipPath) */}
+            <div
+              className="absolute inset-0 z-20 pointer-events-none"
+              style={{ clipPath: `inset(0 ${100 - sliderPos}% 0 0)` }}
+            >
+              <img
+                src="/images/before-terrace.jpg"
+                alt="Empty concrete rooftop terrace before solar panel installation"
+                className="w-full h-full object-cover"
+              />
+              <span className="absolute top-4 left-4 bg-black/80 text-white font-display text-xs font-bold px-3 py-1 rounded-xs border border-white/20 shadow-sm">
+                BEFORE: EMPTY CONCRETE SLAB
+              </span>
+            </div>
+
+            {/* Vertical Divider Line */}
+            <div
+              className="absolute inset-y-0 z-25 border-r-2 border-white shadow-lg pointer-events-none"
+              style={{ left: `${sliderPos}%` }}
+            />
+
+            {/* Divider Handle */}
+            <div
+              className="absolute inset-y-0 z-30 flex items-center justify-center pointer-events-none -ml-4"
+              style={{ left: `${sliderPos}%` }}
+            >
+              <div className="w-8 h-8 rounded-full bg-[#121416] text-white flex items-center justify-center shadow-md border-2 border-white">
+                <div className="flex gap-0.5">
+                  <ArrowLeft className="w-2.5 h-2.5" />
+                  <ArrowRight className="w-2.5 h-2.5" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between text-xs text-[#686F76] pt-2 border-t border-[rgba(18,20,22,0.06)] gap-2">
+            <span>Drag slider horizontally to compare before and after terrace transformation.</span>
+            <span className="text-[#121416] font-display font-bold">Generation: ~22 Units/Day • Full AC & Domestic Load</span>
+          </div>
+
         </div>
 
-        {/* Portfolio Filters */}
-        <div className="flex items-center gap-3 overflow-x-auto pb-4 mb-12 border-b border-slate-800">
+        {/* Category Filter Tabs */}
+        <div className="flex flex-wrap items-center gap-2">
           {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-4 py-2 rounded-sm text-xs font-mono font-bold whitespace-nowrap transition-all border ${
+              className={`px-3.5 py-1.5 rounded-xs border text-xs font-display transition-all ${
                 activeCategory === cat.id
-                  ? 'bg-amber-500 text-amber-950 border-amber-400'
-                  : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                  ? 'bg-[#121416] text-white font-bold border-[#121416]'
+                  : 'bg-white text-[#686F76] border-[rgba(18,20,22,0.1)] hover:text-[#121416]'
               }`}
             >
               {cat.label}
@@ -165,163 +167,114 @@ export const ProjectGallery = ({ projects }: ProjectGalleryProps) => {
           ))}
         </div>
 
-        {/* Portfolio Showcase Grid (Dominant Lead + Asymmetric Grid) */}
-        <div className="space-y-16">
-          
-          {/* Dominant Hero Project */}
-          {featuredProject && (
+        {/* Project Cards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProjects.map((project) => (
             <div
-              onClick={() => setActiveLightboxIndex(0)}
-              className="group cursor-pointer grid grid-cols-1 lg:grid-cols-12 gap-8 items-center border border-slate-800 bg-slate-900/40 p-8 rounded-sm hover:border-slate-700 transition-all"
+              key={project.id}
+              onClick={() => setSelectedProject(project)}
+              className="bg-white border border-[rgba(18,20,22,0.09)] rounded-sm overflow-hidden flex flex-col justify-between group cursor-pointer hover:shadow-md transition-all"
             >
-              <div className="lg:col-span-8 aspect-[16/9] rounded-sm overflow-hidden bg-slate-950 relative">
-                <img
-                  src={featuredProject.imageUrl}
-                  alt={featuredProject.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
-                <span className="absolute top-4 left-4 bg-slate-950/90 text-amber-400 text-xs font-mono font-bold px-3 py-1 rounded border border-slate-700">
-                  {featuredProject.capacityTag}
-                </span>
-                <div className="absolute bottom-4 right-4 p-2.5 rounded bg-slate-950/80 text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Maximize2 className="w-4 h-4 text-amber-400" />
-                </div>
-              </div>
-
-              <div className="lg:col-span-4 space-y-4">
-                <div className="flex items-center gap-1.5 text-xs font-mono text-amber-400">
-                  <MapPin className="w-3.5 h-3.5" />
-                  <span>{featuredProject.location}</span>
-                </div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-white uppercase tracking-tight group-hover:text-amber-400 transition-colors">
-                  {featuredProject.title}
-                </h3>
-                <p className="text-sm text-slate-300 font-light leading-relaxed">
-                  {featuredProject.description}
-                </p>
-                <div className="text-xs font-mono font-semibold text-amber-400 flex items-center gap-1 pt-2">
-                  <span>View Project Lightbox</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Supporting Project Vignettes */}
-          {supportingProjects.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-              {supportingProjects.map((project, idx) => (
-                <div
-                  key={project.id}
-                  onClick={() => setActiveLightboxIndex(idx + 1)}
-                  className="group cursor-pointer space-y-4"
-                >
-                  <div className="aspect-[16/10] rounded-sm overflow-hidden bg-slate-950 border border-slate-800 relative">
-                    <img
-                      src={project.imageUrl}
-                      alt={project.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-70 group-hover:opacity-100 transition-opacity" />
-                    
-                    <span className="absolute top-3 left-3 bg-slate-950/90 text-amber-400 text-[11px] font-mono font-bold px-2.5 py-0.5 rounded border border-slate-700">
-                      {project.capacityTag}
+              <div>
+                <div className="aspect-[16/10] relative bg-[#F2F2EF] overflow-hidden">
+                  <img
+                    src={project.imageUrl}
+                    alt={project.title}
+                    className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+                  />
+                  <div className="absolute top-3 left-3 bg-black/80 font-display text-[9px] text-white font-bold px-2 py-0.5 rounded-xs">
+                    {project.capacityTag}
+                  </div>
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="p-2 rounded-full bg-white text-[#121416] shadow-md">
+                      <Eye className="w-4 h-4" />
                     </span>
-
-                    <div className="absolute top-3 right-3 w-7 h-7 rounded bg-slate-950/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Maximize2 className="w-3.5 h-3.5 text-amber-400" />
-                    </div>
-
-                    <div className="absolute bottom-3 left-3 flex items-center gap-1 text-xs text-slate-300 font-mono">
-                      <MapPin className="w-3 h-3 text-amber-400" />
-                      <span>{project.location}</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h4 className="text-base font-bold text-white uppercase tracking-tight group-hover:text-amber-400 transition-colors mb-1">
-                      {project.title}
-                    </h4>
-                    <p className="text-xs text-slate-400 line-clamp-2 font-light">
-                      {project.description}
-                    </p>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
 
+                <div className="p-5 space-y-2">
+                  <div className="flex items-center gap-1.5 text-[#686F76] text-xs">
+                    <MapPin className="w-3.5 h-3.5 text-[#C46A38] shrink-0" />
+                    <span>{project.location}</span>
+                  </div>
+                  <h3 className="font-display font-bold text-base text-[#121416] line-clamp-1 group-hover:text-[#C46A38] transition-colors">
+                    {project.title}
+                  </h3>
+                  <p className="text-xs text-[#686F76] line-clamp-2 leading-relaxed">
+                    {project.description}
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-3 bg-[#FAFBF5] border-t border-[rgba(18,20,22,0.06)] flex items-center justify-between text-xs text-[#686F76]">
+                <span className="capitalize">{project.category}</span>
+                <span className="font-display font-bold text-[#121416] flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                  <span>View Project</span>
+                  <ArrowRight className="w-3 h-3" />
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
 
       </div>
 
-      {/* Full-Screen Lightbox Modal */}
-      {currentLightboxProject && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+      {/* Lightbox Modal */}
+      {selectedProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8">
           <div
-            className="fixed inset-0 bg-black/90 backdrop-blur-md"
-            onClick={() => setActiveLightboxIndex(null)}
+            className="fixed inset-0 bg-black/80 backdrop-blur-xs"
+            onClick={() => setSelectedProject(null)}
           />
 
-          <div className="relative z-10 max-w-5xl w-full bg-slate-950 border border-slate-800 rounded-sm overflow-hidden shadow-2xl">
-            <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900">
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-mono font-bold text-amber-400 bg-slate-950 px-2.5 py-1 rounded border border-slate-800">
-                  {currentLightboxProject.capacityTag}
+          <div className="relative z-10 max-w-4xl w-full bg-white border border-[rgba(18,20,22,0.15)] rounded-sm overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+            
+            <div className="flex items-center justify-between p-5 border-b border-[rgba(18,20,22,0.08)] bg-[#FAFBF5]">
+              <div>
+                <span className="text-[10px] font-display uppercase tracking-widest text-[#C46A38] font-bold block">
+                  {selectedProject.capacityTag} • {selectedProject.location}
                 </span>
-                <span className="text-sm font-bold text-white uppercase truncate">
-                  {currentLightboxProject.title}
-                </span>
+                <h3 className="font-display font-bold text-xl text-[#121416]">
+                  {selectedProject.title}
+                </h3>
               </div>
 
               <button
-                onClick={() => setActiveLightboxIndex(null)}
-                className="p-1 rounded bg-slate-800 text-slate-300 hover:text-white"
+                onClick={() => setSelectedProject(null)}
+                className="p-1.5 rounded bg-white text-[#686F76] hover:text-[#121416] border border-[rgba(18,20,22,0.1)] focus:outline-none"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="relative aspect-[16/10] sm:aspect-[16/9] bg-black flex items-center justify-center">
-              <img
-                src={currentLightboxProject.imageUrl}
-                alt={currentLightboxProject.title}
-                className="w-full h-full object-contain"
-              />
-
-              {activeLightboxIndex !== null && activeLightboxIndex > 0 && (
-                <button
-                  onClick={() => setActiveLightboxIndex(activeLightboxIndex - 1)}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-slate-950/80 border border-slate-700 text-white hover:bg-amber-500 hover:text-amber-950"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-              )}
-
-              {activeLightboxIndex !== null && activeLightboxIndex < filteredProjects.length - 1 && (
-                <button
-                  onClick={() => setActiveLightboxIndex(activeLightboxIndex + 1)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 p-2.5 rounded-full bg-slate-950/80 border border-slate-700 text-white hover:bg-amber-500 hover:text-amber-950"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              )}
-            </div>
-
-            <div className="p-4 sm:p-5 bg-slate-900 border-t border-slate-800 text-xs">
-              <div className="flex items-center gap-1.5 text-amber-400 font-mono mb-1">
-                <MapPin className="w-3.5 h-3.5" />
-                <span>{currentLightboxProject.location}</span>
+            <div className="p-6 overflow-y-auto space-y-4">
+              <div className="aspect-[16/10] bg-[#F2F2EF] rounded-sm overflow-hidden border border-[rgba(18,20,22,0.08)]">
+                <img
+                  src={selectedProject.imageUrl}
+                  alt={selectedProject.title}
+                  className="w-full h-full object-cover"
+                />
               </div>
-              <p className="text-slate-300 font-light">
-                {currentLightboxProject.description}
+
+              <p className="text-xs sm:text-sm text-[#686F76] leading-relaxed">
+                {selectedProject.description}
               </p>
             </div>
+
+            <div className="p-4 bg-[#FAFBF5] border-t border-[rgba(18,20,22,0.08)] flex items-center justify-between text-xs">
+              <span className="text-[#686F76]">RADHE ELECTRICAL Project Record</span>
+              <button
+                onClick={() => setSelectedProject(null)}
+                className="btn-secondary-outline text-xs py-1.5 px-4"
+              >
+                Close View
+              </button>
+            </div>
+
           </div>
         </div>
       )}
+
     </section>
   );
 };

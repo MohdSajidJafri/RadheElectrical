@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Send, CheckCircle, AlertCircle, MessageSquare, Phone, MapPin, Loader2, ExternalLink } from 'lucide-react';
+import React, { useState } from 'react';
+import { Send, CheckCircle, AlertCircle, MessageSquare, Phone, MapPin, Loader2, ExternalLink, User, ChevronDown } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { enquiryService } from '../services/enquiryService';
 import type { SolarCapacityOption, SolarEnquiry } from '../types';
@@ -11,11 +11,11 @@ interface SolarEnquiryFormProps {
   onEnquirySubmitted?: (enquiry: SolarEnquiry) => void;
 }
 
-export const SolarEnquiryForm = ({
+export const SolarEnquiryForm: React.FC<SolarEnquiryFormProps> = ({
   selectedCapacity,
   initialMessage = '',
   onEnquirySubmitted
-}: SolarEnquiryFormProps) => {
+}) => {
   const [formData, setFormData] = useState({
     name: '',
     mobile: '',
@@ -30,6 +30,7 @@ export const SolarEnquiryForm = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedEnquiry, setSubmittedEnquiry] = useState<SolarEnquiry | null>(null);
   const [prevProps, setPrevProps] = useState({ selectedCapacity, initialMessage });
+
   if (prevProps.selectedCapacity !== selectedCapacity || prevProps.initialMessage !== initialMessage) {
     setPrevProps({ selectedCapacity, initialMessage });
     if (selectedCapacity && selectedCapacity !== formData.capacity) {
@@ -56,63 +57,45 @@ export const SolarEnquiryForm = ({
       newErrors.mobile = 'Enter a valid 10-digit Indian mobile number.';
     }
 
-    if (!formData.district.trim()) {
-      newErrors.district = 'Please enter your district.';
-    }
-
     if (!formData.city.trim()) {
-      newErrors.city = 'Please enter your city/town.';
-    }
-
-    if (!formData.pinCode.trim()) {
-      newErrors.pinCode = 'PIN code is required.';
-    } else if (!/^\d{6}$/.test(formData.pinCode.trim())) {
-      newErrors.pinCode = 'Enter a valid 6-digit PIN code.';
+      newErrors.city = 'Town / Village name is required.';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
 
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 350));
-
-      const created = enquiryService.createEnquiry({
+    setTimeout(() => {
+      const cleanMobile = formData.mobile.replace(/\D/g, '');
+      const newEnquiry = enquiryService.createEnquiry({
         name: formData.name.trim(),
-        mobile: formData.mobile.trim(),
-        district: formData.district.trim(),
+        mobile: cleanMobile,
+        district: formData.district,
         city: formData.city.trim(),
-        pinCode: formData.pinCode.trim(),
+        pinCode: formData.pinCode.trim() || '303303',
         capacity: formData.capacity,
         message: formData.message.trim()
       });
 
-      setSubmittedEnquiry(created);
-
-      try {
-        confetti({
-          particleCount: 50,
-          spread: 60,
-          origin: { y: 0.6 }
-        });
-      } catch {
-        // Fallback
-      }
+      setSubmittedEnquiry(newEnquiry);
+      setIsSubmitting(false);
 
       if (onEnquirySubmitted) {
-        onEnquirySubmitted(created);
+        onEnquirySubmitted(newEnquiry);
       }
-    } catch {
-      setErrors({ form: 'An error occurred. Please call 9982861558 directly.' });
-    } finally {
-      setIsSubmitting(false);
-    }
+
+      confetti({
+        particleCount: 70,
+        spread: 60,
+        origin: { y: 0.6 }
+      });
+    }, 500);
   };
 
   const handleReset = () => {
@@ -129,298 +112,267 @@ export const SolarEnquiryForm = ({
     setErrors({});
   };
 
-  const generateWhatsAppDirectLink = (enquiry: SolarEnquiry) => {
+  const generateWhatsAppHandoff = () => {
+    if (!submittedEnquiry) return BUSINESS_INFO.whatsappUrl;
     const text = encodeURIComponent(
-      `Hello RADHE ELECTRICAL,\nI would like to enquire about a *${enquiry.capacity} Solar System*.\n\nName: ${enquiry.name}\nPhone: ${enquiry.mobile}\nLocation: ${enquiry.city}, ${enquiry.district} (${enquiry.pinCode})\n${enquiry.message ? `Notes: ${enquiry.message}` : ''}\n\nPlease share price details and schedule a rooftop consultation.`
+      `Hello RADHE ELECTRICAL,\nI just submitted an enquiry for a ${submittedEnquiry.capacity} Solar System.\n\nName: ${submittedEnquiry.name}\nPhone: ${submittedEnquiry.mobile}\nLocation: ${submittedEnquiry.city}, ${submittedEnquiry.district}\nRef ID: ${submittedEnquiry.id}\n\nPlease let me know when an on-site rooftop survey can be scheduled.`
     );
     return `https://wa.me/919982861558?text=${text}`;
   };
 
   return (
-    <section id="contact" className="py-28 bg-[#F6F5EE] text-slate-900 border-b border-slate-300 relative">
-      <div className="container-custom">
+    <section id="contact" className="py-16 sm:py-24 bg-[#FAFBF5] text-[#121416] border-t border-[rgba(18,20,22,0.08)]">
+      
+      <div className="container-custom space-y-12">
         
-        {/* Editorial Statement Header */}
-        <div className="max-w-4xl mb-16">
-          <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-800 block mb-3">
-            07 / Consultation & Depot
+        {/* Section Header */}
+        <div className="space-y-2 max-w-xl">
+          <span className="font-display text-[11px] font-bold text-[#686F76] uppercase tracking-wider block">
+            REQUEST A SURVEY
           </span>
-          <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-slate-950 uppercase tracking-tight leading-[1.08]">
-            Let’s see what your roof <br />
-            <span className="text-amber-800">can produce in Dausa.</span>
+          <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[#121416] uppercase tracking-tight">
+            LET'S LOOK AT YOUR ROOFTOP.
           </h2>
-          <p className="text-sm sm:text-base text-slate-700 max-w-xl font-normal leading-relaxed mt-4">
-            Request an on-site feasibility consultation or visit our office on Agra Road. Zero sales pressure, transparent system sizing.
+          <p className="text-xs sm:text-sm text-[#686F76]">
+            Provide your rooftop details below. Our certified engineers will review your shadow profile and contact you directly.
           </p>
         </div>
 
-        {/* Clean 2-Column Hub (Mineral Ground) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+        {/* 2-Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           
-          {/* Left Column: Calm Consultation Form (7 cols) */}
-          <div className="lg:col-span-7 bg-white border border-slate-300 p-8 sm:p-10 rounded-sm shadow-xl">
+          {/* Left: Consultation Form from Reference Style (7 cols) */}
+          <div className="lg:col-span-7 bg-white border border-[rgba(18,20,22,0.09)] p-6 sm:p-10 rounded-sm shadow-xs">
             
             {submittedEnquiry ? (
-              <div className="text-center py-8 space-y-5">
-                <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto">
-                  <CheckCircle className="w-6 h-6" />
+              <div className="text-center py-6 space-y-4">
+                <div className="w-12 h-12 rounded-full bg-[#FAFBF5] border border-[rgba(18,20,22,0.1)] text-[#121416] flex items-center justify-center mx-auto">
+                  <CheckCircle className="w-6 h-6 text-[#C46A38]" />
                 </div>
 
-                <h3 className="text-2xl font-bold text-slate-950 uppercase">
-                  Thank You, {submittedEnquiry.name}!
-                </h3>
-
-                <p className="text-sm text-slate-700 max-w-md mx-auto">
-                  Your enquiry for a <strong className="text-amber-800">{submittedEnquiry.capacity} Solar Setup</strong> has been recorded (Reference: <span className="font-mono text-slate-950 font-bold">{submittedEnquiry.id}</span>).
-                </p>
-
-                <div className="p-4 bg-slate-50 border border-slate-200 text-left text-xs font-mono space-y-1.5 max-w-sm mx-auto">
-                  <div className="flex justify-between text-slate-600">
-                    <span>Contact:</span>
-                    <strong className="text-slate-950">+91 {submittedEnquiry.mobile}</strong>
-                  </div>
-                  <div className="flex justify-between text-slate-600">
-                    <span>Location:</span>
-                    <strong className="text-slate-950">{submittedEnquiry.city}, {submittedEnquiry.district}</strong>
-                  </div>
-                  <div className="flex justify-between text-slate-600">
-                    <span>Capacity:</span>
-                    <strong className="text-amber-800">{submittedEnquiry.capacity}</strong>
-                  </div>
+                <div className="space-y-1">
+                  <span className="text-[10px] font-display uppercase tracking-widest text-[#C46A38] font-bold block">
+                    Ref #{submittedEnquiry.id}
+                  </span>
+                  <h3 className="font-display font-bold text-2xl text-[#121416]">
+                    Thank You, {submittedEnquiry.name}!
+                  </h3>
+                  <p className="text-xs text-[#686F76] max-w-sm mx-auto leading-relaxed">
+                    Our Dausa team has received your request for a {submittedEnquiry.capacity} system in {submittedEnquiry.city}, {submittedEnquiry.district}. We will call you within 2 business hours.
+                  </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-3">
+                <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
                   <a
-                    href={generateWhatsAppDirectLink(submittedEnquiry)}
+                    href={generateWhatsAppHandoff()}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn-mineral text-xs py-3 px-6 flex items-center justify-center gap-2"
+                    className="btn-primary-dark text-xs py-3 px-5 w-full sm:w-auto"
                   >
-                    <MessageSquare className="w-4 h-4 text-emerald-400" />
-                    <span>Send On WhatsApp</span>
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Sync With WhatsApp</span>
                   </a>
 
                   <button
                     onClick={handleReset}
-                    className="py-3 px-5 border border-slate-300 text-xs font-bold text-slate-700 hover:text-slate-950 hover:border-slate-500 rounded-sm"
+                    className="btn-secondary-outline text-xs py-3 px-4 w-full sm:w-auto"
                   >
-                    Submit Another
+                    Submit Another Request
                   </button>
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} noValidate className="space-y-5">
+              <form onSubmit={handleSubmit} className="space-y-4">
                 
-                {errors.form && (
-                  <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    <span>{errors.form}</span>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Name */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                      Full Name *
-                    </label>
+                {/* Name Input with UserIcon */}
+                <div className="space-y-1">
+                  <label className="font-display text-xs font-bold text-[#121416] block">
+                    Your Name *
+                  </label>
+                  <div className="relative">
                     <input
                       type="text"
-                      placeholder="e.g. Ramesh Sharma"
+                      placeholder="Enter your full name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      className={`w-full bg-slate-50 border border-slate-300 rounded-sm px-3.5 py-2.5 text-xs text-slate-950 focus:outline-none focus:border-amber-700 ${errors.name ? 'border-red-500' : ''}`}
+                      className={`w-full bg-[#FAFBF5] border rounded-sm pl-3 pr-9 py-2.5 text-xs text-[#121416] focus:outline-none ${
+                        errors.name ? 'border-red-500' : 'border-[rgba(18,20,22,0.15)] focus:border-[#121416]'
+                      }`}
                     />
-                    {errors.name && <p className="text-[11px] text-red-600 mt-1 font-mono">{errors.name}</p>}
+                    <User className="w-4 h-4 text-[#8E959D] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
+                  {errors.name && (
+                    <span className="text-[10px] text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      <span>{errors.name}</span>
+                    </span>
+                  )}
+                </div>
 
-                  {/* Mobile */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                      Mobile Number *
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-slate-400">
-                        +91
-                      </span>
-                      <input
-                        type="tel"
-                        maxLength={10}
-                        placeholder="9982861558"
-                        value={formData.mobile}
-                        onChange={(e) => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '') })}
-                        className={`w-full bg-slate-50 border border-slate-300 rounded-sm pl-11 pr-3.5 py-2.5 text-xs text-slate-950 font-mono focus:outline-none focus:border-amber-700 ${errors.mobile ? 'border-red-500' : ''}`}
-                      />
-                    </div>
-                    {errors.mobile && <p className="text-[11px] text-red-600 mt-1 font-mono">{errors.mobile}</p>}
-                  </div>
-
-                  {/* District */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                      District *
-                    </label>
+                {/* Phone Number with PhoneIcon */}
+                <div className="space-y-1">
+                  <label className="font-display text-xs font-bold text-[#121416] block">
+                    Phone Number *
+                  </label>
+                  <div className="relative">
                     <input
-                      type="text"
-                      placeholder="e.g. Dausa"
-                      value={formData.district}
-                      onChange={(e) => setFormData({ ...formData, district: e.target.value })}
-                      className={`w-full bg-slate-50 border border-slate-300 rounded-sm px-3.5 py-2.5 text-xs text-slate-950 focus:outline-none focus:border-amber-700 ${errors.district ? 'border-red-500' : ''}`}
+                      type="tel"
+                      placeholder="10-digit Indian Mobile Number"
+                      value={formData.mobile}
+                      onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
+                      className={`w-full bg-[#FAFBF5] border rounded-sm pl-3 pr-9 py-2.5 text-xs text-[#121416] focus:outline-none ${
+                        errors.mobile ? 'border-red-500' : 'border-[rgba(18,20,22,0.15)] focus:border-[#121416]'
+                      }`}
                     />
-                    {errors.district && <p className="text-[11px] text-red-600 mt-1 font-mono">{errors.district}</p>}
+                    <Phone className="w-4 h-4 text-[#8E959D] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
+                  {errors.mobile && (
+                    <span className="text-[10px] text-red-600 flex items-center gap-1">
+                      <AlertCircle className="w-3 h-3" />
+                      <span>{errors.mobile}</span>
+                    </span>
+                  )}
+                </div>
 
-                  {/* City */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                {/* City & District */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-display text-xs font-bold text-[#121416] block">
                       City / Area *
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Bandikui / Agra Road"
+                      placeholder="e.g. Agra Road, Dausa"
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className={`w-full bg-slate-50 border border-slate-300 rounded-sm px-3.5 py-2.5 text-xs text-slate-950 focus:outline-none focus:border-amber-700 ${errors.city ? 'border-red-500' : ''}`}
+                      className={`w-full bg-[#FAFBF5] border rounded-sm px-3 py-2.5 text-xs text-[#121416] focus:outline-none ${
+                        errors.city ? 'border-red-500' : 'border-[rgba(18,20,22,0.15)] focus:border-[#121416]'
+                      }`}
                     />
-                    {errors.city && <p className="text-[11px] text-red-600 mt-1 font-mono">{errors.city}</p>}
+                    {errors.city && (
+                      <span className="text-[10px] text-red-600 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" />
+                        <span>{errors.city}</span>
+                      </span>
+                    )}
                   </div>
 
-                  {/* Pin Code */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                      PIN Code *
-                    </label>
-                    <input
-                      type="text"
-                      maxLength={6}
-                      placeholder="e.g. 303303"
-                      value={formData.pinCode}
-                      onChange={(e) => setFormData({ ...formData, pinCode: e.target.value.replace(/\D/g, '') })}
-                      className={`w-full bg-slate-50 border border-slate-300 rounded-sm px-3.5 py-2.5 text-xs text-slate-950 font-mono focus:outline-none focus:border-amber-700 ${errors.pinCode ? 'border-red-500' : ''}`}
-                    />
-                    {errors.pinCode && <p className="text-[11px] text-red-600 mt-1 font-mono">{errors.pinCode}</p>}
-                  </div>
-
-                  {/* Capacity */}
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                      System Scale *
+                  <div className="space-y-1">
+                    <label className="font-display text-xs font-bold text-[#121416] block">
+                      District
                     </label>
                     <select
-                      value={formData.capacity}
-                      onChange={(e) => setFormData({ ...formData, capacity: e.target.value as SolarCapacityOption })}
-                      className="w-full bg-slate-50 border border-slate-300 rounded-sm px-3.5 py-2.5 text-xs text-slate-950 focus:outline-none focus:border-amber-700 cursor-pointer"
+                      value={formData.district}
+                      onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                      className="w-full bg-[#FAFBF5] border border-[rgba(18,20,22,0.15)] rounded-sm px-3 py-2.5 text-xs text-[#121416] focus:outline-none focus:border-[#121416]"
                     >
-                      <option value="1 KW">1 KW (Small Home / Shop)</option>
-                      <option value="2 KW">2 KW (2-3 BHK Home)</option>
-                      <option value="3 KW">3 KW (Standard Residential)</option>
-                      <option value="5 KW">5 KW (Large Villa / Commercial)</option>
-                      <option value="10 KW+">10 KW+ (Commercial / Factory)</option>
-                      <option value="Not sure">Not sure (Need Advice)</option>
+                      <option value="Dausa">Dausa</option>
+                      <option value="Jaipur">Jaipur</option>
+                      <option value="Alwar">Alwar</option>
+                      <option value="Bharatpur">Bharatpur</option>
+                      <option value="Karauli">Karauli</option>
+                      <option value="Other Rajasthan">Other Rajasthan</option>
                     </select>
                   </div>
                 </div>
 
+                {/* Capacity Dropdown with Chevron */}
+                <div className="space-y-1">
+                  <label className="font-display text-xs font-bold text-[#121416] block">
+                    Select Capacity *
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={formData.capacity}
+                      onChange={(e) => setFormData({ ...formData, capacity: e.target.value as SolarCapacityOption })}
+                      className="w-full bg-[#FAFBF5] border border-[rgba(18,20,22,0.15)] rounded-sm pl-3 pr-9 py-2.5 text-xs text-[#121416] focus:outline-none focus:border-[#121416] appearance-none"
+                    >
+                      <option value="1 KW">1 KW (~4–5 Units/Day • 80 sq.ft.)</option>
+                      <option value="2 KW">2 KW (~8–10 Units/Day • 160 sq.ft.)</option>
+                      <option value="3 KW">3 KW Home Standard (~12–15 Units/Day • 240 sq.ft.) [Most Popular]</option>
+                      <option value="5 KW">5 KW Villa & Dual AC (~20–25 Units/Day • 400 sq.ft.)</option>
+                      <option value="10 KW+">10 KW+ Commercial / 3-Phase (~40–50+ Units/Day)</option>
+                      <option value="Not sure">Not Sure (Need Engineer Assessment)</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-[#8E959D] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  </div>
+                </div>
+
                 {/* Notes */}
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
-                    Requirement Notes (Optional)
+                <div className="space-y-1">
+                  <label className="font-display text-xs font-bold text-[#121416] block">
+                    Roof Type or Notes (Optional)
                   </label>
                   <textarea
                     rows={2}
-                    placeholder="e.g. Roof space details, average monthly bill..."
+                    placeholder="e.g. RCC flat roof with water tank, monthly bill ~₹4,500..."
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full bg-slate-50 border border-slate-300 rounded-sm px-3.5 py-2.5 text-xs text-slate-950 focus:outline-none focus:border-amber-700 resize-none"
+                    className="w-full bg-[#FAFBF5] border border-[rgba(18,20,22,0.15)] rounded-sm p-2.5 text-xs text-[#121416] focus:outline-none focus:border-[#121416]"
                   />
                 </div>
 
+                {/* Submit Button matching Reference Image */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="btn-mineral w-full py-3.5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-sm"
+                  className="btn-primary-dark text-xs py-3.5 px-6 w-full"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Processing...</span>
+                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                      <span>SUBMITTING ENQUIRY...</span>
                     </>
                   ) : (
                     <>
+                      <span>SUBMIT ENQUIRY</span>
                       <Send className="w-4 h-4" />
-                      <span>Submit Consultation Request</span>
                     </>
                   )}
                 </button>
 
               </form>
             )}
+
           </div>
 
-          {/* Right Column: Physical Depot & Google Maps Location (5 cols) */}
+          {/* Right: Physical Depot Location & Google Maps Frame (5 cols) */}
           <div className="lg:col-span-5 space-y-6">
             
-            <div className="bg-white border border-slate-300 p-8 rounded-sm shadow-xl space-y-6">
-              <div>
-                <span className="text-xs font-mono font-bold uppercase tracking-wider text-amber-800 block mb-1">
+            <div className="bg-white border border-[rgba(18,20,22,0.09)] rounded-sm p-6 sm:p-8 shadow-xs space-y-5">
+              
+              <div className="space-y-1">
+                <span className="text-[10px] font-display uppercase tracking-widest text-[#C46A38] font-bold block">
                   Physical Depot Location
                 </span>
-                <h3 className="text-xl font-bold text-slate-950 uppercase font-display">
-                  {BUSINESS_INFO.name}
+                <h3 className="font-display font-bold text-xl text-[#121416]">
+                  RADHE ELECTRICAL
                 </h3>
-                <p className="text-xs text-slate-600 mt-1">
-                  {BUSINESS_INFO.tagline}
-                </p>
               </div>
 
-              <div className="space-y-3.5 pt-4 border-t border-slate-200 text-xs">
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-amber-800 shrink-0 mt-0.5" />
+              <div className="space-y-3 text-xs text-[#686F76]">
+                <div className="flex items-start gap-2.5">
+                  <MapPin className="w-4 h-4 text-[#121416] shrink-0 mt-0.5" />
                   <div>
-                    <strong className="text-slate-950 block">Depot Address:</strong>
-                    <span className="text-slate-700">{BUSINESS_INFO.location}</span>
-                    <span className="block text-slate-500 font-mono mt-0.5">PIN: {BUSINESS_INFO.pincode}</span>
+                    <strong className="text-[#121416] block">Near Giriraj Dharan Mandir, Agra Road</strong>
+                    <span>Dausa, Rajasthan (PIN: 303303)</span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <Phone className="w-4 h-4 text-amber-800 shrink-0" />
+                <div className="flex items-center gap-2.5">
+                  <Phone className="w-4 h-4 text-[#121416] shrink-0" />
                   <div>
-                    <strong className="text-slate-950 block">Direct Telephone:</strong>
-                    <a href={BUSINESS_INFO.phoneTel} className="text-amber-800 font-bold font-mono hover:underline">
-                      {BUSINESS_INFO.phoneDisplay}
-                    </a>
+                    <strong className="text-[#121416] block">Hotline: +91 9982861558</strong>
+                    <span className="text-[11px] text-[#686F76]">Mon – Sun: 8:00 AM – 8:00 PM</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-3 pt-2">
-                <a
-                  href={BUSINESS_INFO.phoneTel}
-                  className="btn-mineral text-xs py-2.5 px-4 flex items-center gap-2"
-                >
-                  <Phone className="w-3.5 h-3.5" />
-                  <span>Call 9982861558</span>
-                </a>
-
-                <a
-                  href={BUSINESS_INFO.whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="py-2.5 px-4 border border-slate-300 text-xs font-bold text-slate-700 hover:text-slate-950 hover:border-slate-500 rounded-sm flex items-center gap-2"
-                >
-                  <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>WhatsApp Direct</span>
-                </a>
-              </div>
-            </div>
-
-            {/* Embedded Live Google Maps */}
-            <div className="rounded-sm overflow-hidden border border-slate-300 bg-white shadow-xl">
-              <div className="aspect-[16/9] w-full relative bg-slate-100">
+              {/* Embedded Google Maps Frame */}
+              <div className="aspect-[16/9] rounded-sm overflow-hidden border border-[rgba(18,20,22,0.1)] bg-[#FAFBF5] relative">
                 <iframe
-                  title="RADHE ELECTRICAL Location in Dausa"
-                  src="https://maps.google.com/maps?q=26.9065717,76.3788313&hl=en&z=16&output=embed"
+                  title="RADHE ELECTRICAL Location on Google Maps"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3558.423985390772!2d76.37625637628853!3d26.90657177665225!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x396d8bbd90d048bd%3A0x87540d033c6c2edb!2sRADHE%20ELECTRICAL!5e0!3m2!1sen!2sin!4v1716382000000!5m2!1sen!2sin"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -431,18 +383,16 @@ export const SolarEnquiryForm = ({
                 />
               </div>
 
-              <div className="p-3.5 bg-white border-t border-slate-200 flex items-center justify-between text-xs font-mono">
-                <span className="text-slate-600">Near Giriraj Dharan Temple</span>
-                <a
-                  href={BUSINESS_INFO.googleMapsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-amber-800 hover:underline font-bold flex items-center gap-1"
-                >
-                  <span>Open Maps</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              </div>
+              <a
+                href={BUSINESS_INFO.googleMapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary-outline text-xs py-2.5 px-4 w-full flex items-center justify-center gap-2"
+              >
+                <span>Open in Google Maps</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+
             </div>
 
           </div>
@@ -450,6 +400,7 @@ export const SolarEnquiryForm = ({
         </div>
 
       </div>
+
     </section>
   );
 };
